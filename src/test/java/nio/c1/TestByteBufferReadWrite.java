@@ -1,8 +1,8 @@
-package netty.c1;
+package nio.c1;
 
 import java.nio.ByteBuffer;
 
-import static netty.c1.ByteBufferUtil.debugAll;
+import static nio.c1.ByteBufferUtil.debugAll;
 
 public class TestByteBufferReadWrite {
     public static void main(String[] args) {

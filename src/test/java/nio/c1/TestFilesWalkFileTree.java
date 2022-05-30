@@ -1,4 +1,4 @@
-package netty.c1;
+package nio.c1;
 
 import java.io.IOException;
 import java.nio.file.*;

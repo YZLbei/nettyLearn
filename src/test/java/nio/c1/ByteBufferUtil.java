@@ -1,4 +1,4 @@
-package netty.c1;
+package nio.c1;
 
 import io.netty.util.internal.StringUtil;
 

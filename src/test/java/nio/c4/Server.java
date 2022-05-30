@@ -1,21 +1,14 @@
-package netty.c4;
+package nio.c4;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 
-import static netty.c1.ByteBufferUtil.debugAll;
-import static netty.c1.ByteBufferUtil.debugRead;
+import static nio.c1.ByteBufferUtil.debugAll;
 
 @Slf4j
 public class Server {
