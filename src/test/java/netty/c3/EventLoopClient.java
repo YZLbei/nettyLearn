@@ -62,10 +62,13 @@ public class EventLoopClient {
         
         
         //方法二
-        closeFuture.addListener((ChannelFutureListener) channelFuture1 -> {
-            log.debug("处理关闭后的操作");
-            //优雅的
-            group.shutdownGracefully();
+        closeFuture.addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture channelFuture1) throws Exception {
+                log.debug("处理关闭后的操作");
+                //优雅的
+                group.shutdownGracefully();
+            }
         });
         
 

@@ -26,7 +26,7 @@ public class EventLoopServer {
                             public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
                                 ByteBuf buffer = (ByteBuf) msg;
                                 /**
-                                 * ByteBuf转换成字符串执行狐妖toString
+                                 * ByteBuf转换成字符串执行toString
                                  */
                                 log.debug(buffer.toString(Charset.defaultCharset()));
                                 //必须要有fireChannelRead，将msg传递给下一个handler
