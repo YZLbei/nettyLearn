@@ -115,7 +115,7 @@ public class ChatClient {
                                             case "gsend":
                                                 ctx.writeAndFlush(new GroupChatRequestMessage(username,s[1],s[2]));
                                                 break;
-                                            case "greate":
+                                            case "gcreate":
                                                 Set <String>member =  new HashSet<String>( Arrays.asList(s[2].split(",")));
                                                 member.add(username);
                                                 ctx.writeAndFlush(new GroupCreateRequestMessage(s[1],member));

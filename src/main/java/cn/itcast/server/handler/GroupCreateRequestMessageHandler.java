@@ -6,12 +6,14 @@ import cn.itcast.server.session.Group;
 import cn.itcast.server.session.GroupSession;
 import cn.itcast.server.session.GroupSessionFactory;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 import java.util.List;
 import java.util.Set;
 
+@ChannelHandler.Sharable
 public class GroupCreateRequestMessageHandler extends SimpleChannelInboundHandler<GroupCreateRequestMessage> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, GroupCreateRequestMessage msg) throws Exception {
