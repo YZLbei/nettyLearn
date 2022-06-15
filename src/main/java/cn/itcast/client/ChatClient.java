@@ -4,15 +4,15 @@ import cn.itcast.message.*;
 import cn.itcast.protocol.MessageCodecSharable;
 import cn.itcast.protocol.ProcotolFrameDecoder;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelInitializer;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -47,6 +47,30 @@ public class ChatClient {
                     ch.pipeline().addLast(new ProcotolFrameDecoder());
                     ch.pipeline().addLast(LOGGING_HANDLER);
                     ch.pipeline().addLast(MESSAGE_CODEC);
+                    /**
+                     * 用来判断是不是，读空闲时间过长或者写时间过长
+                     * 3s内没向服务器写事件，就会触发事件IdleState.WRITER_IDLE事件
+                     * 心跳机制，隔一段事件向服务器发送心跳包
+                     * 时间大概为服务器readerIdleTime时间的一半
+                     */
+                    ch.pipeline().addLast(new IdleStateHandler(0,3,0));
+                    //双向，既可以作为入站处理器也有出站
+                    ch.pipeline().addLast(new ChannelDuplexHandler(){
+                        //用来触发特殊事件
+                        @Override
+                        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+                            IdleStateEvent event = (IdleStateEvent) evt;
+                            //出发了写空闲事件
+                            if(event.state()== IdleState.WRITER_IDLE){
+                                log.debug("3s没有写数据，发送心跳包");
+                                ctx.writeAndFlush(new PingMessage());
+
+                            }
+                            super.userEventTriggered(ctx, evt);
+                        }
+                    });
+                    
+                    
                     //需要的是入站处理器，入站处理器向channel中write之后会出战处理器，codec既有入站也有出战
                     //入站处理器就是接收前面handler消息
                     ch.pipeline().addLast(new ChannelInboundHandlerAdapter(){

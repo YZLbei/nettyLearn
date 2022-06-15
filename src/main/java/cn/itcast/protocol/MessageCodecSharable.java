@@ -1,5 +1,6 @@
 package cn.itcast.protocol;
 
+import cn.itcast.config.Config;
 import cn.itcast.message.Message;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
@@ -27,7 +28,12 @@ public class MessageCodecSharable extends MessageToMessageCodec<ByteBuf, Message
         // 2. 1 字节的版本,
         out.writeByte(1);
         // 3. 1 字节的序列化方式 jdk 0 , json 1
-        out.writeByte(0);
+        /**
+         * 枚举对象
+         * 对应着0和1
+         */
+        out.writeByte(Config.getSerializerAlgorithm().ordinal());
+        //out.writeByte(0);
         // 4. 1 字节的指令类型
         out.writeByte(msg.getMessageType());
         // 5. 4 个字节
@@ -35,10 +41,13 @@ public class MessageCodecSharable extends MessageToMessageCodec<ByteBuf, Message
         // 无意义，对齐填充
         out.writeByte(0xff);
         // 6. 获取内容的字节数组
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(bos);
-        oos.writeObject(msg);
-        byte[] bytes = bos.toByteArray();
+//        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//        ObjectOutputStream oos = new ObjectOutputStream(bos);
+//        oos.writeObject(msg);
+//        byte[] bytes = bos.toByteArray();
+
+
+        byte[] bytes = Config.getSerializerAlgorithm().serialize(msg);
         // 7. 长度
         out.writeInt(bytes.length);
         // 8. 写入内容
@@ -57,8 +66,15 @@ public class MessageCodecSharable extends MessageToMessageCodec<ByteBuf, Message
         int length = in.readInt();
         byte[] bytes = new byte[length];
         in.readBytes(bytes, 0, length);
-        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
-        Message message = (Message) ois.readObject();
+//        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
+//        Message message = (Message) ois.readObject();
+
+
+        // 找到反序列化算法
+        Serializer.Algorithm algorithm = Serializer.Algorithm.values()[serializerType];
+        // 确定具体消息类型
+        Class<?> messageClass = Message.getMessageClass(messageType);
+        Object message = algorithm.deserialize(messageClass, bytes);
         log.debug("{}, {}, {}, {}, {}, {}", magicNum, version, serializerType, messageType, sequenceId, length);
         log.debug("{}", message);
         out.add(message);
