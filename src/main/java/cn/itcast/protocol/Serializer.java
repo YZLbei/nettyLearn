@@ -1,8 +1,9 @@
 package cn.itcast.protocol;
 
-import com.google.gson.Gson;
+import com.google.gson.*;
 
 import java.io.*;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -49,17 +50,37 @@ public interface Serializer {
         Json{
             @Override
             public <T> T deserialize(Class<T> clazz, byte[] bytes) {
+                Gson gson = new GsonBuilder().registerTypeAdapter(Class.class,new Serializer.ClassCodec()).create();
                 String s = new String(bytes,StandardCharsets.UTF_8);
-                T obj = new Gson().fromJson(s, clazz);
+                T obj = gson.fromJson(s, clazz);
                 return obj;
             }
 
             @Override
             public <T> byte[] serialize(T object) {
+                Gson gson = new GsonBuilder().registerTypeAdapter(Class.class,new Serializer.ClassCodec()).create();
                 //把java对象转化成Json的字符串
-                String s = new Gson().toJson(object);
+                String s = gson.toJson(object);
                 return s.getBytes(StandardCharsets.UTF_8);
             }
+        }
+    }
+    class ClassCodec implements JsonSerializer<Class<?>>, JsonDeserializer<Class<?>> {
+
+        @Override
+        public Class<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            try {
+                String str = json.getAsString();
+                return Class.forName(str);
+            } catch (ClassNotFoundException e) {
+                throw new JsonParseException(e);
+            }
+        }
+
+        @Override             //   String.class
+        public JsonElement serialize(Class<?> src, Type typeOfSrc, JsonSerializationContext context) {
+            // class -> json
+            return new JsonPrimitive(src.getName());
         }
     }
 }
